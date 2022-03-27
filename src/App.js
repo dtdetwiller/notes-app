@@ -6,11 +6,21 @@ import Split from "react-split"
 import {nanoid} from "nanoid"
 
 export default function App() {
-    const [notes, setNotes] = React.useState([])
+		// The array of all notes, lazy load the the initial data
+    const [notes, setNotes] = React.useState(
+			() => JSON.parse(localStorage.getItem("notes")) || []
+		)
+		// The current note being worked on
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
     
+		// Save notes to local storage every time a the notes state is changed.
+		React.useEffect(() => {
+			localStorage.setItem("notes", JSON.stringify(notes))
+		}, [notes])
+
+		// Creates a new note
     function createNewNote() {
         const newNote = {
             id: nanoid(),
@@ -18,8 +28,10 @@ export default function App() {
         }
         setNotes(prevNotes => [newNote, ...prevNotes])
         setCurrentNoteId(newNote.id)
+
     }
     
+		// Updates an existing note if edited.
     function updateNote(text) {
         setNotes(oldNotes => oldNotes.map(oldNote => {
             return oldNote.id === currentNoteId
@@ -28,6 +40,7 @@ export default function App() {
         }))
     }
     
+		// Finds the current note so that it can be highlighted in CSS
     function findCurrentNote() {
         return notes.find(note => {
             return note.id === currentNoteId
