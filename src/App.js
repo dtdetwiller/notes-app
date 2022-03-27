@@ -32,19 +32,38 @@ export default function App() {
     }
     
 		// Updates an existing note if edited.
+		// Pushes note to top of list on sidebar
     function updateNote(text) {
-        setNotes(oldNotes => oldNotes.map(oldNote => {
-            return oldNote.id === currentNoteId
-                ? { ...oldNote, body: text }
-                : oldNote
-        }))
+			setNotes(oldNotes => {
+
+				const newArray = []
+
+				for (let i = 0; i < oldNotes.length; i++) {
+					
+					if (oldNotes[i].id === currentNoteId)
+						newArray.unshift({...oldNotes[i], body: text})
+					else
+						newArray.push(oldNotes[i])
+				}
+
+				return newArray
+			})
     }
+		
+		// Deletes a note 
+		function deleteNote(event, noteId) {
+			// Stops the click from clicking the parent.
+			event.stopPropagation()
+			
+			// Don't include the  note (nodeId) in the returned array
+			setNotes(prevNotes => prevNotes.filter(note => note.id !== noteId))
+		}
     
 		// Finds the current note so that it can be highlighted in CSS
     function findCurrentNote() {
-        return notes.find(note => {
-            return note.id === currentNoteId
-        }) || notes[0]
+			return notes.find(note => {
+					return note.id === currentNoteId
+			}) || notes[0]
     }
     
     return (
@@ -62,6 +81,7 @@ export default function App() {
                     currentNote={findCurrentNote()}
                     setCurrentNoteId={setCurrentNoteId}
                     newNote={createNewNote}
+										deleteNote={deleteNote}
                 />
                 {
                     currentNoteId && 
